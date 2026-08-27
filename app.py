@@ -4,20 +4,26 @@ import streamlit as st
 
 # Check if rembg is available
 try:
-    from rembg import remove as remove_bg
+    from rembg import new_session, remove as remove_bg
+
     REMBG_AVAILABLE = True
 except Exception:
     REMBG_AVAILABLE = False
 
-st.set_page_config(page_title="EditEdge Studio", page_icon="📷", layout="wide")
+st.set_page_config(
+    page_title="EditEdge Studio", page_icon="📷", layout="wide"
+)
 
 # Custom Styling
-st.markdown("""
+st.markdown(
+    """
     <style>
     .stApp { background-color: #0f172a; }
     .stButton>button { width: 100%; border-radius: 8px; font-weight: bold; }
     </style>
-""", unsafe_allow_html=True)
+""",
+    unsafe_allow_html=True,
+)
 
 # --- SESSION STATES INITIALIZATION ---
 if "logged_in" not in st.session_state:
@@ -35,12 +41,12 @@ if "bg_processed_img" not in st.session_state:
 if not st.session_state.logged_in:
     st.title("🔒 EditEdge Studio Login")
     col1, col2, col3 = st.columns([1, 2, 1])
-    
+
     with col2:
         st.subheader("Login Credentials")
         user = st.text_input("Username", value="admin")
         pwd = st.text_input("Password", type="password", value="1234")
-        
+
         if st.button("Login to Editor", type="primary"):
             if user == "admin" and pwd == "1234":
                 st.session_state.logged_in = True
@@ -64,7 +70,9 @@ else:
 
     # --- SIDEBAR CONTROLS ---
     st.sidebar.header("📂 Step 1: Upload Image")
-    uploaded_file = st.sidebar.file_uploader("Choose an Image File", type=["png", "jpg", "jpeg", "webp"])
+    uploaded_file = st.sidebar.file_uploader(
+        "Choose an Image File", type=["png", "jpg", "jpeg", "webp"]
+    )
 
     if uploaded_file:
         raw_img = Image.open(uploaded_file).convert("RGB")
@@ -74,7 +82,7 @@ else:
 
         # Rotate & Reset Buttons
         btn_col1, btn_col2 = st.sidebar.columns(2)
-        
+
         if btn_col1.button("↻ Rotate 90°"):
             st.session_state.angle = (st.session_state.angle + 90) % 360
 
@@ -86,8 +94,20 @@ else:
             st.rerun()
 
         # Sliders
-        brightness = st.sidebar.slider("Brightness", 0.1, 2.0, st.session_state.get("brightness", 1.0), key="brightness")
-        contrast = st.sidebar.slider("Contrast", 0.1, 2.0, st.session_state.get("contrast", 1.0), key="contrast")
+        brightness = st.sidebar.slider(
+            "Brightness",
+            0.1,
+            2.0,
+            st.session_state.get("brightness", 1.0),
+            key="brightness",
+        )
+        contrast = st.sidebar.slider(
+            "Contrast",
+            0.1,
+            2.0,
+            st.session_state.get("contrast", 1.0),
+            key="contrast",
+        )
 
         # AI Tools Section
         st.sidebar.markdown("---")
@@ -98,19 +118,35 @@ else:
 
         if REMBG_AVAILABLE:
             if st.sidebar.button("Remove Background (AI) ⚡"):
-                with st.spinner("AI Processing... Please wait..."):
+                with st.spinner(
+                    "AI Processing... (Fast lightweight model loading)..."
+                ):
                     try:
+                        # Resize slightly for super fast performance
                         temp_img = raw_img.copy()
-                        temp_img.thumbnail((1024, 1024))
-                        st.session_state.bg_processed_img = remove_bg(temp_img)
-                        st.success("Background Removed!")
+                        temp_img.thumbnail((800, 800))
+
+                        # Using lightweight u2netp session (~4MB instead of 170MB)
+                        session = new_session("u2netp")
+                        st.session_state.bg_processed_img = remove_bg(
+                            temp_img, session=session
+                        )
+                        st.success("Background Removed Successfully!")
                     except Exception as e:
-                        st.error(f"Error removing background: {e}")
+                        st.error(f"Background Removal Error: {e}")
 
             if st.session_state.bg_processed_img is not None:
                 st.sidebar.markdown("**Passport / Document BG Color:**")
-                bg_option = st.sidebar.radio("Select BG:", ["Transparent (PNG)", "Solid White", "Passport Blue", "Custom Color"])
-                
+                bg_option = st.sidebar.radio(
+                    "Select BG:",
+                    [
+                        "Transparent (PNG)",
+                        "Solid White",
+                        "Passport Blue",
+                        "Custom Color",
+                    ],
+                )
+
                 if bg_option == "Solid White":
                     apply_color_bg = True
                     bg_color_hex = "#FFFFFF"
@@ -119,22 +155,30 @@ else:
                     bg_color_hex = "#00BFFF"
                 elif bg_option == "Custom Color":
                     apply_color_bg = True
-                    bg_color_hex = st.sidebar.color_picker("Pick Custom BG Color", "#FFFFFF")
+                    bg_color_hex = st.sidebar.color_picker(
+                        "Pick Custom BG Color", "#FFFFFF"
+                    )
 
                 if st.sidebar.button("Restore Original BG"):
                     st.session_state.bg_processed_img = None
                     st.rerun()
         else:
-            st.sidebar.warning("AI BG Removal disabled. Check requirements.txt")
+            st.sidebar.warning(
+                "AI BG Removal disabled. Please check requirements.txt"
+            )
 
         # --- IMAGE PROCESSING ---
         if st.session_state.bg_processed_img is not None:
             no_bg_img = st.session_state.bg_processed_img.copy()
-            
+
             if apply_color_bg:
-                hex_val = bg_color_hex.lstrip('#')
-                rgb_color = tuple(int(hex_val[i:i+2], 16) for i in (0, 2, 4))
-                solid_bg = Image.new("RGBA", no_bg_img.size, rgb_color + (255,))
+                hex_val = bg_color_hex.lstrip("#")
+                rgb_color = tuple(
+                    int(hex_val[i : i + 2], 16) for i in (0, 2, 4)
+                )
+                solid_bg = Image.new(
+                    "RGBA", no_bg_img.size, rgb_color + (255,)
+                )
                 solid_bg.paste(no_bg_img, (0, 0), no_bg_img)
                 edited_img = solid_bg.convert("RGB")
             else:
@@ -144,7 +188,9 @@ else:
 
         # Apply Rotation
         if st.session_state.angle != 0:
-            edited_img = edited_img.rotate(-st.session_state.angle, expand=True)
+            edited_img = edited_img.rotate(
+                -st.session_state.angle, expand=True
+            )
 
         # Apply Brightness & Contrast
         edited_img = ImageEnhance.Brightness(edited_img).enhance(brightness)
@@ -155,12 +201,16 @@ else:
 
         with col_view:
             st.subheader("Live Preview")
-            # Fixed st.image parameter for compatibility
-            st.image(edited_img, caption=f"Current Rotation: {st.session_state.angle}°")
+            st.image(
+                edited_img,
+                caption=f"Current Rotation: {st.session_state.angle}°",
+            )
 
         with col_export:
             st.subheader("🚀 Export Options")
-            export_fmt = st.selectbox("Export Format", ["PNG", "JPEG", "PDF", "WEBP"])
+            export_fmt = st.selectbox(
+                "Export Format", ["PNG", "JPEG", "PDF", "WEBP"]
+            )
 
             buf = io.BytesIO()
             if export_fmt == "PDF":
@@ -177,7 +227,8 @@ else:
                 data=buf.getvalue(),
                 file_name=f"editedge_output.{export_fmt.lower()}",
                 mime=f"image/{export_fmt.lower()}",
-                type="primary"
+                type="primary",
             )
     else:
         st.info("👈 Please upload an image from the sidebar to start editing.")
+
