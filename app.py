@@ -153,7 +153,7 @@ else:
 
         with col_view:
             st.subheader("Live Preview")
-            st.image(edited_img, caption=f"Current Rotation: {st.session_state.angle}°", use_container_width=True)
+            st.image(edited_img, caption=f"Current Rotation: {st.session_state.angle}°", use_column_width=True)
 
         with col_export:
             st.subheader("🚀 Export Options")
