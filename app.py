@@ -11,7 +11,7 @@ except Exception:
 
 st.set_page_config(page_title="EditEdge Studio", page_icon="📷", layout="wide")
 
-# Custom Theme
+# Custom Styling
 st.markdown("""
     <style>
     .stApp { background-color: #0f172a; }
@@ -19,7 +19,7 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- SESSION STATES ---
+# --- SESSION STATES INITIALIZATION ---
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
 
@@ -29,7 +29,9 @@ if "angle" not in st.session_state:
 if "bg_processed_img" not in st.session_state:
     st.session_state.bg_processed_img = None
 
-# --- 1. LOGIN PAGE ---
+# ---------------------------------------------------------
+# 1. LOGIN PAGE
+# ---------------------------------------------------------
 if not st.session_state.logged_in:
     st.title("🔒 EditEdge Studio Login")
     col1, col2, col3 = st.columns([1, 2, 1])
@@ -46,11 +48,13 @@ if not st.session_state.logged_in:
             else:
                 st.error("Invalid Credentials! (Default: admin / 1234)")
 
-# --- 2. MAIN EDITOR PAGE ---
+# ---------------------------------------------------------
+# 2. MAIN EDITOR PAGE
+# ---------------------------------------------------------
 else:
     head_col1, head_col2 = st.columns([4, 1])
     with head_col1:
-        st.title("📷 EditEdge Studio ")
+        st.title("📷 EditEdge Studio Web")
     with head_col2:
         if st.button("Logout 🚪"):
             st.session_state.logged_in = False
@@ -85,22 +89,24 @@ else:
         brightness = st.sidebar.slider("Brightness", 0.1, 2.0, st.session_state.get("brightness", 1.0), key="brightness")
         contrast = st.sidebar.slider("Contrast", 0.1, 2.0, st.session_state.get("contrast", 1.0), key="contrast")
 
-        # AI Tools Section (Background Removal + Solid Color Background)
+        # AI Tools Section
         st.sidebar.markdown("---")
         st.sidebar.header("🤖 AI Tools & Backgrounds")
 
-        bg_color_hex = "#FFFFFF" # Default White
+        bg_color_hex = "#FFFFFF"
         apply_color_bg = False
 
         if REMBG_AVAILABLE:
             if st.sidebar.button("Remove Background (AI) ⚡"):
-                with st.spinner("AI Processing... Removing Background..."):
-                    temp_img = raw_img.copy()
-                    temp_img.thumbnail((1024, 1024))
-                    st.session_state.bg_processed_img = remove_bg(temp_img)
-                    st.success("Background Removed!")
+                with st.spinner("AI Processing... Please wait..."):
+                    try:
+                        temp_img = raw_img.copy()
+                        temp_img.thumbnail((1024, 1024))
+                        st.session_state.bg_processed_img = remove_bg(temp_img)
+                        st.success("Background Removed!")
+                    except Exception as e:
+                        st.error(f"Error removing background: {e}")
 
-            # Background Color Options (For Passport Photo Setup)
             if st.session_state.bg_processed_img is not None:
                 st.sidebar.markdown("**Passport / Document BG Color:**")
                 bg_option = st.sidebar.radio("Select BG:", ["Transparent (PNG)", "Solid White", "Passport Blue", "Custom Color"])
@@ -119,19 +125,15 @@ else:
                     st.session_state.bg_processed_img = None
                     st.rerun()
         else:
-            st.sidebar.warning("AI BG Removal disabled. Install using `pip install rembg[cpu]`")
+            st.sidebar.warning("AI BG Removal disabled. Check requirements.txt")
 
         # --- IMAGE PROCESSING ---
         if st.session_state.bg_processed_img is not None:
             no_bg_img = st.session_state.bg_processed_img.copy()
             
-            # If Solid BG Color Selected (White/Blue/Custom)
             if apply_color_bg:
-                # Convert hex color to RGB tuple
                 hex_val = bg_color_hex.lstrip('#')
                 rgb_color = tuple(int(hex_val[i:i+2], 16) for i in (0, 2, 4))
-                
-                # Create a solid canvas and paste transparent image over it
                 solid_bg = Image.new("RGBA", no_bg_img.size, rgb_color + (255,))
                 solid_bg.paste(no_bg_img, (0, 0), no_bg_img)
                 edited_img = solid_bg.convert("RGB")
@@ -153,6 +155,7 @@ else:
 
         with col_view:
             st.subheader("Live Preview")
+            # Fixed st.image parameter for compatibility
             st.image(edited_img, caption=f"Current Rotation: {st.session_state.angle}°")
 
         with col_export:
@@ -172,7 +175,7 @@ else:
             st.download_button(
                 label=f"Download {export_fmt}",
                 data=buf.getvalue(),
-                file_name=f"editedge_passport_photo.{export_fmt.lower()}",
+                file_name=f"editedge_output.{export_fmt.lower()}",
                 mime=f"image/{export_fmt.lower()}",
                 type="primary"
             )
