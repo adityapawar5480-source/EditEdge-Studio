@@ -2,6 +2,12 @@ import io
 from PIL import Image, ImageEnhance, ImageOps
 import streamlit as st
 
+# Handle Google Site Verification URL query
+query_params = st.query_params
+if "google64c8f94d6985226e.html" in query_params:
+    st.write("google-site-verification: google64c8f94d6985226e.html")
+    st.stop()
+
 # Check if rembg is available
 try:
     from rembg import new_session, remove as remove_bg
