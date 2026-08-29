@@ -75,6 +75,14 @@ else:
             st.session_state.bg_processed_img = None
             st.rerun()
 
+    st.info("📱 **Mobile Users:** Top-left par **`>`** (Sidebar) icon click karke Photo Upload karein!")
+
+    # --- SIDEBAR CONTROLS ---
+    st.sidebar.header("📂 Step 1: Upload Image")
+    uploaded_file = st.sidebar.file_uploader(
+        "Choose an Image File", type=["png", "jpg", "jpeg", "webp"]
+    )
+
     # --- SIDEBAR CONTROLS ---
     st.sidebar.header("📂 Step 1: Upload Image")
     uploaded_file = st.sidebar.file_uploader(
