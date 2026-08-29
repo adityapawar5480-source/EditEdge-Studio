@@ -2,9 +2,12 @@ import io
 from PIL import Image, ImageEnhance, ImageOps
 import streamlit as st
 
-# Handle Google Site Verification URL query
+# --- GOOGLE SITE VERIFICATION ROUTE ---
 query_params = st.query_params
-if "google64c8f94d6985226e.html" in query_params:
+if (
+    "google64c8f94d6985226e.html" in str(query_params)
+    or query_params.get("verify") == "true"
+):
     st.write("google-site-verification: google64c8f94d6985226e.html")
     st.stop()
 
