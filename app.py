@@ -14,7 +14,7 @@ st.set_page_config(
     page_title="EditEdge Studio", page_icon="📷", layout="wide"
 )
 
-# Custom Styling (Option 1 + 2 UI Boost)
+# Custom Styling (Premium Dark Theme)
 st.markdown(
     """
     <style>
@@ -23,6 +23,7 @@ st.markdown(
     .stButton>button { width: 100%; border-radius: 8px; font-weight: 600; background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; }
     [data-testid="stImage"] img { border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
     [data-testid="stDownloadButton"]>button { background: linear-gradient(90deg, #10b981 0%, #059669 100%); border: none; font-weight: bold; }
+    [data-testid="stFileUploader"] { background-color: #1e293b; border: 2px dashed #475569; border-radius: 12px; padding: 15px; }
     </style>
 """,
     unsafe_allow_html=True,
@@ -75,6 +76,7 @@ else:
             st.session_state.bg_processed_img = None
             st.rerun()
 
+    # --- WELCOME BANNER ---
     st.info("""### 🚀 Welcome to EditEdge Studio!
 Your lightweight, AI-powered web platform for fast image processing and professional document preparation directly in your browser.
 
@@ -85,21 +87,18 @@ Your lightweight, AI-powered web platform for fast image processing and professi
 * **Aspect Ratio Presets:** Quick cropping presets for 1:1 Square, 3:4 Passport, and 16:9 Banner layouts.
 * **Multi-Format Export:** Seamlessly convert and download your images in PNG, JPEG, WEBP, or direct PDF formats.""")
 
-    st.warning(
-        "📱 **Mobile Users:** Click on **`>>`** (Sidebar) at top-left to upload your image."
-    )
-
-    # --- SIDEBAR CONTROLS ---
-    st.sidebar.header("📂 Step 1: Upload Image")
-    uploaded_file = st.sidebar.file_uploader(
-        "Choose an Image File", type=["png", "jpg", "jpeg", "webp"]
+    # --- MAIN SCREEN CENTRE FILE UPLOADER ---
+    uploaded_file = st.file_uploader(
+        "📂 Upload Image Here to Start Editing",
+        type=["png", "jpg", "jpeg", "webp"],
+        key="main_file_uploader",
     )
 
     if uploaded_file:
         raw_img = Image.open(uploaded_file).convert("RGB")
 
-        st.sidebar.markdown("---")
-        st.sidebar.header("⚙️ Step 2: Edit Controls")
+        # --- SIDEBAR CONTROLS ---
+        st.sidebar.header("⚙️ Edit Controls")
 
         # Rotate & Flip Controls
         b_col1, b_col2 = st.sidebar.columns(2)
@@ -294,5 +293,5 @@ Your lightweight, AI-powered web platform for fast image processing and professi
                 type="primary",
             )
     else:
-        st.info("👈 Please upload an image from the sidebar to start editing.")
+        st.info("👆 Please upload an image using the box above to start editing.")
 
