@@ -58,7 +58,7 @@ if not st.session_state.logged_in:
                 st.rerun()
             else:
                 st.error("Invalid Credentials! (Default: admin / 1234)")
-if st.button("📞 Admin Support & Help")
+        st.button("📞 Admin Support & Help")
     st.info(
                 "If you forgot your password or need assistance, please reach out to the administrator:\n\n"
                 "**Admins:** Aditya Pawar, Aadarsh Raj, Anuj Kumar\n"
