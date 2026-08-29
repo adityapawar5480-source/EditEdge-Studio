@@ -51,8 +51,8 @@ if not st.session_state.logged_in:
 
     with col2:
         st.subheader("Login Credentials")
-        user = st.text_input("Username", value="admin")
-        pwd = st.text_input("Password", type="password", value="1234")
+        user = st.text_input("Username", value="EditEdge")
+        pwd = st.text_input("Password", type="password", value="4141")
 
         if st.button("Login to Editor", type="primary"):
             if user == "admin" and pwd == "1234":
