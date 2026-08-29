@@ -31,6 +31,8 @@ st.markdown(
 # --- SESSION STATES INITIALIZATION ---
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
+if "show_help" not in st.session_state:
+    st.session_state.show_help = False
 if "angle" not in st.session_state:
     st.session_state.angle = 0
 if "flip_h" not in st.session_state:
@@ -56,7 +58,21 @@ if not st.session_state.logged_in:
             if user == "admin" and pwd == "1234":
                 st.session_state.logged_in = True
                 st.rerun()
-          
+            else:
+                st.error("Invalid Credentials! (Default: admin / 1234)")
+
+        if st.button("📞 Admin Support & Help"):
+            st.session_state.show_help = not st.session_state.show_help
+
+        if st.session_state.show_help:
+            st.info(
+                "If you forgot your password or need assistance, please reach out to the administrator:\n\n"
+                "**Admins:** Aditya Pawar, Aadarsh Raj, Anuj Kumar\n"
+                "📧 **Email:** adityapawar.cse25@satyug.edu.in\n"
+                "📱 **Phone:** +91 9289863106\n"
+                "💬 **Office:** Satyug Darshan Institute of Engineering & Technology, FBD"
+            )
+
 # ---------------------------------------------------------
 # 2. MAIN EDITOR PAGE
 # ---------------------------------------------------------
@@ -96,10 +112,9 @@ Your lightweight, AI-powered web platform for fast image processing and professi
     if uploaded_file:
         raw_img = Image.open(uploaded_file).convert("RGB")
 
-        # Layout Split: Desktop me side-by-side, Mobile me vertical stacked
         col_preview, col_controls = st.columns([1, 1])
 
-        # --- CONTROLS SECTION (IN MAIN PAGE) ---
+        # --- CONTROLS SECTION ---
         with col_controls:
             st.subheader("⚙️ Edit Controls")
 
@@ -262,7 +277,7 @@ Your lightweight, AI-powered web platform for fast image processing and professi
         if is_grayscale:
             edited_img = ImageOps.grayscale(edited_img)
 
-        # --- PREVIEW & EXPORT (TOP LEFT PANEL) ---
+        # --- LEFT PANEL: PREVIEW ONLY ---
         with col_preview:
             st.subheader("🖼️ Live Preview")
             st.image(
@@ -270,6 +285,9 @@ Your lightweight, AI-powered web platform for fast image processing and professi
                 caption=f"Dimensions: {edited_img.width}x{edited_img.height} px",
             )
 
+        # --- RIGHT PANEL (BOTTOM): EXPORT OPTIONS ---
+        with col_controls:
+            st.markdown("---")
             st.subheader("🚀 Export Options")
             export_fmt = st.selectbox(
                 "Export Format", ["PNG", "JPEG", "PDF", "WEBP"]
@@ -297,4 +315,3 @@ Your lightweight, AI-powered web platform for fast image processing and professi
         st.info(
             "👆 Upload an image using the box above to open the photo editor."
         )
-
