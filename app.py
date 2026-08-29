@@ -56,7 +56,7 @@ if not st.session_state.logged_in:
             if user == "admin" and pwd == "1234":
                 st.session_state.logged_in = True
                 st.rerun()
-            else:
+        else:
           
 # ---------------------------------------------------------
 # 2. MAIN EDITOR PAGE
