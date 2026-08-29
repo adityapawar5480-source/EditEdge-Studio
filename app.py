@@ -2,6 +2,8 @@ import io
 from PIL import Image, ImageEnhance, ImageOps
 import streamlit as st
 
+st.markdown('<meta name="google-site-verification" content="2DiIAkL6ur30Emi5-wa3KGxxkozTULJq_XwbZ1c1Boc" />', unsafe_allow_html=True)
+
 # Check if rembg is available
 try:
     from rembg import new_session, remove as remove_bg
