@@ -1,2 +1,3 @@
-[server]
-enableStaticServing = true
+[client]
+googleAnalyticsId = "G-71KETRQF0R"
+
