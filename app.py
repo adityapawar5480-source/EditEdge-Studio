@@ -83,12 +83,6 @@ else:
         "Choose an Image File", type=["png", "jpg", "jpeg", "webp"]
     )
 
-    # --- SIDEBAR CONTROLS ---
-    st.sidebar.header("📂 Step 1: Upload Image")
-    uploaded_file = st.sidebar.file_uploader(
-        "Choose an Image File", type=["png", "jpg", "jpeg", "webp"]
-    )
-
     if uploaded_file:
         raw_img = Image.open(uploaded_file).convert("RGB")
 
