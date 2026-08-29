@@ -67,7 +67,8 @@ if st.button("📞 Admin Support & Help"):
                 "📱 **Phone:** +91 9289863106\n"
                 "💬 **Office:** Satyug Darshan Institute of Engineering & Technology, FBD"
             )
-else:
+     else:
+          
     
        
 # ---------------------------------------------------------
