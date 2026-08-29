@@ -19,7 +19,6 @@ st.markdown(
     """
     <style>
     .stApp { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #f8fafc; }
-    [data-testid="stSidebar"] { background-color: #090d16; border-right: 1px solid #334155; }
     .stButton>button { width: 100%; border-radius: 8px; font-weight: 600; background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; }
     [data-testid="stImage"] img { border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
     [data-testid="stDownloadButton"]>button { background: linear-gradient(90deg, #10b981 0%, #059669 100%); border: none; font-weight: bold; }
@@ -77,7 +76,8 @@ else:
             st.rerun()
 
     # --- WELCOME BANNER ---
-    st.info("""### 🚀 Welcome to EditEdge Studio!
+    with st.expander("🚀 Welcome & Features Guide (Click to expand/collapse)"):
+        st.write("""
 Your lightweight, AI-powered web platform for fast image processing and professional document preparation directly in your browser.
 
 **Key Features & Capabilities:**
@@ -85,7 +85,8 @@ Your lightweight, AI-powered web platform for fast image processing and professi
 * **Passport & ID Studio:** One-click background synthesis for solid white, official blue, or custom color fills.
 * **Smart Enhancements:** Real-time controls for brightness, contrast, color saturation, sharpness, and grayscale filters.
 * **Aspect Ratio Presets:** Quick cropping presets for 1:1 Square, 3:4 Passport, and 16:9 Banner layouts.
-* **Multi-Format Export:** Seamlessly convert and download your images in PNG, JPEG, WEBP, or direct PDF formats.""")
+* **Multi-Format Export:** Seamlessly convert and download your images in PNG, JPEG, WEBP, or direct PDF formats.
+""")
 
     # --- MAIN SCREEN CENTRE FILE UPLOADER ---
     uploaded_file = st.file_uploader(
@@ -97,113 +98,118 @@ Your lightweight, AI-powered web platform for fast image processing and professi
     if uploaded_file:
         raw_img = Image.open(uploaded_file).convert("RGB")
 
-        # --- SIDEBAR CONTROLS ---
-        st.sidebar.header("⚙️ Edit Controls")
+        # Layout Split: Desktop me side-by-side, Mobile me vertical stacked
+        col_preview, col_controls = st.columns([1, 1])
 
-        # Rotate & Flip Controls
-        b_col1, b_col2 = st.sidebar.columns(2)
-        if b_col1.button("↻ Rotate 90°"):
-            st.session_state.angle = (st.session_state.angle + 90) % 360
+        # --- CONTROLS SECTION (IN MAIN PAGE) ---
+        with col_controls:
+            st.subheader("⚙️ Edit Controls")
 
-        if b_col2.button("↔️ Mirror Flip"):
-            st.session_state.flip_h = not st.session_state.flip_h
+            tab1, tab2, tab3 = st.tabs(
+                ["🎛️ Enhancements", "📐 Crop & Rotate", "🤖 AI Tools"]
+            )
 
-        if st.sidebar.button("↺ Reset All"):
-            st.session_state.angle = 0
-            st.session_state.flip_h = False
-            st.session_state.flip_v = False
-            st.session_state.brightness = 1.0
-            st.session_state.contrast = 1.0
-            st.session_state.saturation = 1.0
-            st.session_state.sharpness = 1.0
-            st.session_state.bg_processed_img = None
-            st.rerun()
-
-        # Sliders
-        brightness = st.sidebar.slider(
-            "Brightness",
-            0.1,
-            2.0,
-            st.session_state.get("brightness", 1.0),
-            key="brightness",
-        )
-        contrast = st.sidebar.slider(
-            "Contrast",
-            0.1,
-            2.0,
-            st.session_state.get("contrast", 1.0),
-            key="contrast",
-        )
-        saturation = st.sidebar.slider(
-            "Color Saturation",
-            0.0,
-            2.0,
-            st.session_state.get("saturation", 1.0),
-            key="saturation",
-        )
-        sharpness = st.sidebar.slider(
-            "Sharpness",
-            0.0,
-            3.0,
-            st.session_state.get("sharpness", 1.0),
-            key="sharpness",
-        )
-
-        # Filters & Aspect Ratio Preset
-        st.sidebar.markdown("---")
-        st.sidebar.header("📐 Crop & Filters")
-        crop_option = st.sidebar.selectbox(
-            "Preset Aspect Ratio Crop",
-            ["Original (No Crop)", "1:1 Square", "3:4 Passport", "16:9 Banner"],
-        )
-        is_grayscale = st.sidebar.checkbox("Black & White (Grayscale)")
-
-        # AI Tools Section
-        st.sidebar.markdown("---")
-        st.sidebar.header("🤖 AI Tools & Backgrounds")
-
-        bg_color_hex = "#FFFFFF"
-        apply_color_bg = False
-
-        if REMBG_AVAILABLE:
-            if st.sidebar.button("Remove Background (AI) ⚡"):
-                with st.spinner("AI Processing... Please wait..."):
-                    try:
-                        temp_img = raw_img.copy()
-                        temp_img.thumbnail((800, 800))
-                        session = new_session("u2netp")
-                        st.session_state.bg_processed_img = remove_bg(
-                            temp_img, session=session
-                        )
-                        st.success("Background Removed!")
-                    except Exception as e:
-                        st.error(f"Error: {e}")
-
-            if st.session_state.bg_processed_img is not None:
-                bg_option = st.sidebar.radio(
-                    "Select BG:",
-                    [
-                        "Transparent (PNG)",
-                        "Solid White",
-                        "Passport Blue",
-                        "Custom Color",
-                    ],
-                )
-                if bg_option == "Solid White":
-                    apply_color_bg = True
-                    bg_color_hex = "#FFFFFF"
-                elif bg_option == "Passport Blue":
-                    apply_color_bg = True
-                    bg_color_hex = "#00BFFF"
-                elif bg_option == "Custom Color":
-                    apply_color_bg = True
-                    bg_color_hex = st.sidebar.color_picker(
-                        "Pick Custom BG Color", "#FFFFFF"
-                    )
-
-                if st.sidebar.button("Restore Original BG"):
+            with tab1:
+                b_col1, b_col2, b_col3 = st.columns(3)
+                if b_col1.button("↻ Rotate 90°"):
+                    st.session_state.angle = (st.session_state.angle + 90) % 360
+                if b_col2.button("↔️ Mirror Flip"):
+                    st.session_state.flip_h = not st.session_state.flip_h
+                if b_col3.button("↺ Reset All"):
+                    st.session_state.angle = 0
+                    st.session_state.flip_h = False
+                    st.session_state.flip_v = False
+                    st.session_state.brightness = 1.0
+                    st.session_state.contrast = 1.0
+                    st.session_state.saturation = 1.0
+                    st.session_state.sharpness = 1.0
                     st.session_state.bg_processed_img = None
                     st.rerun()
+
+                brightness = st.slider(
+                    "Brightness",
+                    0.1,
+                    2.0,
+                    st.session_state.get("brightness", 1.0),
+                    key="brightness",
+                )
+                contrast = st.slider(
+                    "Contrast",
+                    0.1,
+                    2.0,
+                    st.session_state.get("contrast", 1.0),
+                    key="contrast",
+                )
+                saturation = st.slider(
+                    "Color Saturation",
+                    0.0,
+                    2.0,
+                    st.session_state.get("saturation", 1.0),
+                    key="saturation",
+                )
+                sharpness = st.slider(
+                    "Sharpness",
+                    0.0,
+                    3.0,
+                    st.session_state.get("sharpness", 1.0),
+                    key="sharpness",
+                )
+
+            with tab2:
+                crop_option = st.selectbox(
+                    "Preset Aspect Ratio Crop",
+                    [
+                        "Original (No Crop)",
+                        "1:1 Square",
+                        "3:4 Passport",
+                        "16:9 Banner",
+                    ],
+                )
+                is_grayscale = st.checkbox("Black & White (Grayscale)")
+
+            with tab3:
+                bg_color_hex = "#FFFFFF"
+                apply_color_bg = False
+
+                if REMBG_AVAILABLE:
+                    if st.button("Remove Background (AI) ⚡"):
+                        with st.spinner("AI Processing... Please wait..."):
+                            try:
+                                temp_img = raw_img.copy()
+                                temp_img.thumbnail((800, 800))
+                                session = new_session("u2netp")
+                                st.session_state.bg_processed_img = remove_bg(
+                                    temp_img, session=session
+                                )
+                                st.success("Background Removed!")
+                            except Exception as e:
+                                st.error(f"Error: {e}")
+
+                    if st.session_state.bg_processed_img is not None:
+                        bg_option = st.radio(
+                            "Select BG:",
+                            [
+                                "Transparent (PNG)",
+                                "Solid White",
+                                "Passport Blue",
+                                "Custom Color",
+                            ],
+                        )
+                        if bg_option == "Solid White":
+                            apply_color_bg = True
+                            bg_color_hex = "#FFFFFF"
+                        elif bg_option == "Passport Blue":
+                            apply_color_bg = True
+                            bg_color_hex = "#00BFFF"
+                        elif bg_option == "Custom Color":
+                            apply_color_bg = True
+                            bg_color_hex = st.color_picker(
+                                "Pick Custom BG Color", "#FFFFFF"
+                            )
+
+                        if st.button("Restore Original BG"):
+                            st.session_state.bg_processed_img = None
+                            st.rerun()
 
         # --- IMAGE PROCESSING ENGINE ---
         if st.session_state.bg_processed_img is not None:
@@ -258,17 +264,14 @@ Your lightweight, AI-powered web platform for fast image processing and professi
         if is_grayscale:
             edited_img = ImageOps.grayscale(edited_img)
 
-        # --- PREVIEW & EXPORT ---
-        col_view, col_export = st.columns([3, 1])
-
-        with col_view:
-            st.subheader("Live Preview")
+        # --- PREVIEW & EXPORT (TOP LEFT PANEL) ---
+        with col_preview:
+            st.subheader("🖼️ Live Preview")
             st.image(
                 edited_img,
                 caption=f"Dimensions: {edited_img.width}x{edited_img.height} px",
             )
 
-        with col_export:
             st.subheader("🚀 Export Options")
             export_fmt = st.selectbox(
                 "Export Format", ["PNG", "JPEG", "PDF", "WEBP"]
@@ -293,5 +296,7 @@ Your lightweight, AI-powered web platform for fast image processing and professi
                 type="primary",
             )
     else:
-        st.info("👆 Please upload an image using the box above to start editing.")
+        st.info(
+            "👆 Upload an image using the box above to open the photo editor."
+        )
 
