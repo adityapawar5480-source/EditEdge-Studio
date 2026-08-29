@@ -1,5 +1,5 @@
 import io
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageEnhance, ImageOps
 import streamlit as st
 
 # Check if rembg is available
@@ -14,12 +14,15 @@ st.set_page_config(
     page_title="EditEdge Studio", page_icon="📷", layout="wide"
 )
 
-# Custom Styling
+# Custom Styling (Option 1 + 2 UI Boost)
 st.markdown(
     """
     <style>
-    .stApp { background-color: #0f172a; }
-    .stButton>button { width: 100%; border-radius: 8px; font-weight: bold; }
+    .stApp { background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); color: #f8fafc; }
+    [data-testid="stSidebar"] { background-color: #090d16; border-right: 1px solid #334155; }
+    .stButton>button { width: 100%; border-radius: 8px; font-weight: 600; background: linear-gradient(90deg, #3b82f6 0%, #2563eb 100%); color: white; border: none; }
+    [data-testid="stImage"] img { border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5); }
+    [data-testid="stDownloadButton"]>button { background: linear-gradient(90deg, #10b981 0%, #059669 100%); border: none; font-weight: bold; }
     </style>
 """,
     unsafe_allow_html=True,
@@ -28,10 +31,12 @@ st.markdown(
 # --- SESSION STATES INITIALIZATION ---
 if "logged_in" not in st.session_state:
     st.session_state.logged_in = False
-
 if "angle" not in st.session_state:
     st.session_state.angle = 0
-
+if "flip_h" not in st.session_state:
+    st.session_state.flip_h = False
+if "flip_v" not in st.session_state:
+    st.session_state.flip_v = False
 if "bg_processed_img" not in st.session_state:
     st.session_state.bg_processed_img = None
 
@@ -65,6 +70,8 @@ else:
         if st.button("Logout 🚪"):
             st.session_state.logged_in = False
             st.session_state.angle = 0
+            st.session_state.flip_h = False
+            st.session_state.flip_v = False
             st.session_state.bg_processed_img = None
             st.rerun()
 
@@ -80,16 +87,22 @@ else:
         st.sidebar.markdown("---")
         st.sidebar.header("⚙️ Step 2: Edit Controls")
 
-        # Rotate & Reset Buttons
-        btn_col1, btn_col2 = st.sidebar.columns(2)
-
-        if btn_col1.button("↻ Rotate 90°"):
+        # Rotate & Flip Controls
+        b_col1, b_col2 = st.sidebar.columns(2)
+        if b_col1.button("↻ Rotate 90°"):
             st.session_state.angle = (st.session_state.angle + 90) % 360
 
-        if btn_col2.button("↺ Reset All"):
+        if b_col2.button("↔️ Mirror Flip"):
+            st.session_state.flip_h = not st.session_state.flip_h
+
+        if st.sidebar.button("↺ Reset All"):
             st.session_state.angle = 0
+            st.session_state.flip_h = False
+            st.session_state.flip_v = False
             st.session_state.brightness = 1.0
             st.session_state.contrast = 1.0
+            st.session_state.saturation = 1.0
+            st.session_state.sharpness = 1.0
             st.session_state.bg_processed_img = None
             st.rerun()
 
@@ -108,6 +121,29 @@ else:
             st.session_state.get("contrast", 1.0),
             key="contrast",
         )
+        saturation = st.sidebar.slider(
+            "Color Saturation",
+            0.0,
+            2.0,
+            st.session_state.get("saturation", 1.0),
+            key="saturation",
+        )
+        sharpness = st.sidebar.slider(
+            "Sharpness",
+            0.0,
+            3.0,
+            st.session_state.get("sharpness", 1.0),
+            key="sharpness",
+        )
+
+        # Filters & Aspect Ratio Preset
+        st.sidebar.markdown("---")
+        st.sidebar.header("📐 Crop & Filters")
+        crop_option = st.sidebar.selectbox(
+            "Preset Aspect Ratio Crop",
+            ["Original (No Crop)", "1:1 Square", "3:4 Passport", "16:9 Banner"],
+        )
+        is_grayscale = st.sidebar.checkbox("Black & White (Grayscale)")
 
         # AI Tools Section
         st.sidebar.markdown("---")
@@ -118,25 +154,19 @@ else:
 
         if REMBG_AVAILABLE:
             if st.sidebar.button("Remove Background (AI) ⚡"):
-                with st.spinner(
-                    "AI Processing... (Fast lightweight model loading)..."
-                ):
+                with st.spinner("AI Processing... Please wait..."):
                     try:
-                        # Resize slightly for super fast performance
                         temp_img = raw_img.copy()
                         temp_img.thumbnail((800, 800))
-
-                        # Using lightweight u2netp session (~4MB instead of 170MB)
                         session = new_session("u2netp")
                         st.session_state.bg_processed_img = remove_bg(
                             temp_img, session=session
                         )
-                        st.success("Background Removed Successfully!")
+                        st.success("Background Removed!")
                     except Exception as e:
-                        st.error(f"Background Removal Error: {e}")
+                        st.error(f"Error: {e}")
 
             if st.session_state.bg_processed_img is not None:
-                st.sidebar.markdown("**Passport / Document BG Color:**")
                 bg_option = st.sidebar.radio(
                     "Select BG:",
                     [
@@ -146,7 +176,6 @@ else:
                         "Custom Color",
                     ],
                 )
-
                 if bg_option == "Solid White":
                     apply_color_bg = True
                     bg_color_hex = "#FFFFFF"
@@ -162,15 +191,10 @@ else:
                 if st.sidebar.button("Restore Original BG"):
                     st.session_state.bg_processed_img = None
                     st.rerun()
-        else:
-            st.sidebar.warning(
-                "AI BG Removal disabled. Please check requirements.txt"
-            )
 
-        # --- IMAGE PROCESSING ---
+        # --- IMAGE PROCESSING ENGINE ---
         if st.session_state.bg_processed_img is not None:
             no_bg_img = st.session_state.bg_processed_img.copy()
-
             if apply_color_bg:
                 hex_val = bg_color_hex.lstrip("#")
                 rgb_color = tuple(
@@ -186,15 +210,40 @@ else:
         else:
             edited_img = raw_img.copy()
 
-        # Apply Rotation
+        # Apply Aspect Ratio Crop
+        if crop_option != "Original (No Crop)":
+            w, h = edited_img.size
+            if crop_option == "1:1 Square":
+                min_dim = min(w, h)
+                edited_img = edited_img.crop((0, 0, min_dim, min_dim))
+            elif crop_option == "3:4 Passport":
+                new_h = int(w * 4 / 3)
+                if new_h <= h:
+                    edited_img = edited_img.crop((0, 0, w, new_h))
+                else:
+                    new_w = int(h * 3 / 4)
+                    edited_img = edited_img.crop((0, 0, new_w, h))
+            elif crop_option == "16:9 Banner":
+                new_h = int(w * 9 / 16)
+                if new_h <= h:
+                    edited_img = edited_img.crop((0, 0, w, new_h))
+
+        # Apply Rotation & Flips
         if st.session_state.angle != 0:
             edited_img = edited_img.rotate(
                 -st.session_state.angle, expand=True
             )
+        if st.session_state.flip_h:
+            edited_img = ImageOps.mirror(edited_img)
 
-        # Apply Brightness & Contrast
+        # Apply Enhancements
         edited_img = ImageEnhance.Brightness(edited_img).enhance(brightness)
         edited_img = ImageEnhance.Contrast(edited_img).enhance(contrast)
+        edited_img = ImageEnhance.Color(edited_img).enhance(saturation)
+        edited_img = ImageEnhance.Sharpness(edited_img).enhance(sharpness)
+
+        if is_grayscale:
+            edited_img = ImageOps.grayscale(edited_img)
 
         # --- PREVIEW & EXPORT ---
         col_view, col_export = st.columns([3, 1])
@@ -203,7 +252,7 @@ else:
             st.subheader("Live Preview")
             st.image(
                 edited_img,
-                caption=f"Current Rotation: {st.session_state.angle}°",
+                caption=f"Dimensions: {edited_img.width}x{edited_img.height} px",
             )
 
         with col_export:
@@ -213,12 +262,13 @@ else:
             )
 
             buf = io.BytesIO()
-            if export_fmt == "PDF":
-                pdf_img = edited_img.convert("RGB")
-                pdf_img.save(buf, format="PDF", resolution=100.0)
-            elif export_fmt == "JPEG":
-                jpeg_img = edited_img.convert("RGB")
-                jpeg_img.save(buf, format="JPEG")
+            if export_fmt in ["PDF", "JPEG"]:
+                save_img = edited_img.convert("RGB")
+                save_img.save(
+                    buf,
+                    format=export_fmt,
+                    resolution=100.0 if export_fmt == "PDF" else None,
+                )
             else:
                 edited_img.save(buf, format=export_fmt)
 
