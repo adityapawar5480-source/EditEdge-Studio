@@ -90,9 +90,10 @@ else:
             st.rerun()
 
     # --- WELCOME BANNER ---
-    with st.expander("🚀 Welcome & Features Guide (Click to expand/collapse)"):
+    with st.expander("🚀 ABOUT (Click to expand/collapse)"):
         st.write("""
-Your lightweight, AI-powered web platform for fast image processing and professional document preparation directly in your browser.
+welcome to EditEdge Studio!        
+An lightweight, AI-powered web platform for fast image processing and professional document preparation directly in your browser.
 
 **Key Features & Capabilities:**
 * **AI Background Removal:** Instant, high-precision removal powered by optimized ONNX neural models.
