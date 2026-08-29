@@ -86,7 +86,7 @@ Your lightweight, AI-powered web platform for fast image processing and professi
 * **Multi-Format Export:** Seamlessly convert and download your images in PNG, JPEG, WEBP, or direct PDF formats.""")
 
     st.warning(
-        "📱 **Mobile Users:** Click on **`>`** (Sidebar) at top-left to upload your image."
+        "📱 **Mobile Users:** Click on **`>>`** (Sidebar) at top-left to upload your image."
     )
 
     # --- SIDEBAR CONTROLS ---
