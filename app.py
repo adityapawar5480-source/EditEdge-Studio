@@ -75,17 +75,19 @@ else:
             st.session_state.bg_processed_img = None
             st.rerun()
 
-    st.info("""Welcome to EditEdge Studio!
+    st.info("""### 🚀 Welcome to EditEdge Studio!
 Your lightweight, AI-powered web platform for fast image processing and professional document preparation directly in your browser.
 
-Key Features & Capabilities
-AI Background Removal: Instant, high-precision background removal powered by optimized ONNX neural models.
-Passport & ID Studio: One-click background synthesis for solid white, official blue, or custom color fills.
-Smart Enhancements: Real-time controls for brightness, contrast, color saturation, sharpness, and grayscale filters.
-Aspect Ratio Presets: Quick cropping presets for 1:1 Square, 3:4 Passport, and 16:9 Banner layouts.
-Multi-Format Export: Seamlessly convert and download your images in PNG, JPEG, WEBP, or direct PDF formats.
+**Key Features & Capabilities:**
+* **AI Background Removal:** Instant, high-precision removal powered by optimized ONNX neural models.
+* **Passport & ID Studio:** One-click background synthesis for solid white, official blue, or custom color fills.
+* **Smart Enhancements:** Real-time controls for brightness, contrast, color saturation, sharpness, and grayscale filters.
+* **Aspect Ratio Presets:** Quick cropping presets for 1:1 Square, 3:4 Passport, and 16:9 Banner layouts.
+* **Multi-Format Export:** Seamlessly convert and download your images in PNG, JPEG, WEBP, or direct PDF formats.""")
 
-    📱 Mobile Users:click on sidebar at top left to upload your image""")
+    st.warning(
+        "📱 **Mobile Users:** Click on **`>`** (Sidebar) at top-left to upload your image."
+    )
 
     # --- SIDEBAR CONTROLS ---
     st.sidebar.header("📂 Step 1: Upload Image")
