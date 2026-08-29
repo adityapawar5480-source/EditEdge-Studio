@@ -13,6 +13,13 @@ except Exception:
 st.set_page_config(
     page_title="EditEdge Studio", page_icon="📷", layout="wide"
 )
+#Google site verification tag
+st.markdown(
+    """
+    <meta name="google-site-verification" content="2DiIAkL6ur30Emi5-wa3KGxxkozTULJq_XwbZ1c1Boc" />
+    """,
+    unsafe_allow_html=True,
+)
 
 # Custom Styling (Premium Dark Theme)
 st.markdown(
