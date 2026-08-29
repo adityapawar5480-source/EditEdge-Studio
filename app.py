@@ -55,11 +55,11 @@ if not st.session_state.logged_in:
         pwd = st.text_input("Password", type="password", value="4141")
 
         if st.button("Login to Editor", type="primary"):
-            if user == "admin" and pwd == "1234":
+            if user == "EditEdge" and pwd == "4141":
                 st.session_state.logged_in = True
                 st.rerun()
             else:
-                st.error("Invalid Credentials! (Default: admin / 1234)")
+                st.error("Invalid Credentials! (Default: EditEdge / 4141)")
 
         if st.button("📞 Admin Support & Help"):
             st.session_state.show_help = not st.session_state.show_help
