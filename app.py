@@ -74,6 +74,10 @@ else:
             st.session_state.flip_v = False
             st.session_state.bg_processed_img = None
             st.rerun()
+            # Mobile Users Alert Box
+st.info(
+    "📱 **Mobile Users:** Left top par **`>`** (Sidebar) icon click karke Photo Upload & Controls access karein!"
+)
 
     # --- SIDEBAR CONTROLS ---
     st.sidebar.header("📂 Step 1: Upload Image")
