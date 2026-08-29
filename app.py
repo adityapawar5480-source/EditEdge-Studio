@@ -59,7 +59,7 @@ if not st.session_state.logged_in:
             else:
                 st.error("Invalid Credentials! (Default: admin / 1234)")
         st.button("📞 Admin Support & Help")
-    st.info(
+         if st.info(
                 "If you forgot your password or need assistance, please reach out to the administrator:\n\n"
                 "**Admins:** Aditya Pawar, Aadarsh Raj, Anuj Kumar\n"
                 "📧 **Email:** adityapawar.cse25@satyug.edu.in\n"
@@ -67,6 +67,7 @@ if not st.session_state.logged_in:
                 "💬 **Office:** Satyug Darshan Institute of Engineering & Technology, FBD"
             )
     
+  
 
 # ---------------------------------------------------------
 # 2. MAIN EDITOR PAGE
