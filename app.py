@@ -58,6 +58,8 @@ if not st.session_state.logged_in:
                 st.rerun()
             else:
                 st.error("Invalid Credentials! (Default: admin / 1234)")
+    st.button("📞 Admin Support & Help")
+    
 
 # ---------------------------------------------------------
 # 2. MAIN EDITOR PAGE
