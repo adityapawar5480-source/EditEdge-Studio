@@ -67,7 +67,7 @@ if not st.session_state.logged_in:
         if st.session_state.show_help:
             st.info(
                 "If you forgot your password or need assistance, please reach out to the administrator:\n\n"
-                "👨‍💼 **Admins:**  Aditya Pawar, Aadarsh Raj  \n"
+                "👨‍💼 **Admins:**    Aditya Pawar, Aadarsh Raj  \n"
                 "📧 **Email:**   adityapawar.cse25@satyug.edu.in  \n"
                 "📱 **Phone:**   +91 9289863106  \n"
                 "💬 **Office:**  Satyug Darshan Institute of Engineering & Technology, FBD"
