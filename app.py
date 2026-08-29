@@ -56,7 +56,10 @@ if not st.session_state.logged_in:
             if user == "admin" and pwd == "1234":
                 st.session_state.logged_in = True
                 st.rerun()
-        elif st.button("📞 Admin Support & Help"):
+            else:
+                st.error("Invalid Credentials! (Default: admin / 1234)")
+
+if st.button("📞 Admin Support & Help"):
             st.info(
                 "If you forgot your password or need assistance, please reach out to the administrator:\n\n"
                 "**Admins:** Aditya Pawar, Aadarsh Raj, Anuj Kumar\n"
@@ -64,11 +67,7 @@ if not st.session_state.logged_in:
                 "📱 **Phone:** +91 9289863106\n"
                 "💬 **Office:** Satyug Darshan Institute of Engineering & Technology, FBD"
             )
-        else:
        
-    
-  
-
 # ---------------------------------------------------------
 # 2. MAIN EDITOR PAGE
 # ---------------------------------------------------------
