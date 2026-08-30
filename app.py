@@ -321,7 +321,4 @@ An lightweight, AI-powered web platform for fast image processing and profession
                 mime=f"image/{export_fmt.lower()}",
                 type="primary",
             )
-    else:
-        st.info(
-            "👆 Upload an image using the box above to open the photo editor."
-        )
+
